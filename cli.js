@@ -2,7 +2,8 @@
 
 // cli.js
 const { program } = require("commander");
-const convertHtmlToMarkdown = require("./index");
+const { convert } = require("./index");
+const fs = require("fs");
 const path = require("path");
 const packageJson = require("./package.json");
 
@@ -20,11 +21,15 @@ program
   .action(async (url, options) => {
     const outputPath = path.resolve(options.output);
     const timeout = parseInt(options.timeout, 10);
-    const noJs = options.noJs || false;
+    const disableJavaScript = options.noJs || false;
 
     try {
-      await convertHtmlToMarkdown(url, outputPath, timeout, noJs);
-      console.log(`✅ Conversion completed successfully`);
+      const markdown = await convert({
+        url,
+        options: { timeout, disableJavaScript },
+      });
+      fs.writeFileSync(outputPath, markdown);
+      console.log(`✅ Markdown saved to ${outputPath}`);
       process.exit(0);
     } catch (error) {
       console.error("❌ Conversion failed:", error.message);

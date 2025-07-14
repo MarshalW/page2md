@@ -1,6 +1,5 @@
 // index.js
 const puppeteer = require("puppeteer");
-const fs = require("fs");
 const TurndownService = require("turndown");
 const { JSDOM } = require("jsdom");
 const { promisify } = require("util");
@@ -9,17 +8,23 @@ const wait = promisify(setTimeout);
 
 /**
  * 将给定URL的HTML内容转换为Markdown。
- * @param {string} url - 要转换的网页URL。
- * @param {string} outputPath - Markdown文件的输出路径。
- * @param {number} timeout - Maximum time to wait for page loading in milliseconds.
- * @param {boolean} noJs - Disable JavaScript execution for static content.
+ * @param {Object} config - 配置对象
+ * @param {string} config.url - 要转换的网页URL
+ * @param {Object} [config.options] - 可选配置
+ * @param {number} [config.options.timeout=30000] - 页面加载最大等待时间（毫秒）
+ * @param {boolean} [config.options.disableJavaScript=false] - 是否禁用JavaScript执行
+ * @returns {Promise<string>} - 转换后的Markdown内容
  */
-async function convertHtmlToMarkdown(
+async function convertHtmlToMarkdown({
   url,
-  outputPath,
-  timeout = 30000,
-  noJs = false
-) {
+  options = { timeout: 30000, disableJavaScript: false },
+} = {}) {
+  const { timeout = 30000, disableJavaScript = false } = options;
+
+  if (!url) {
+    throw new Error("URL is required");
+  }
+
   let browser;
   try {
     // 启动浏览器
@@ -44,8 +49,8 @@ async function convertHtmlToMarkdown(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     );
 
-    // 禁用JavaScript（如果指定了--no-js）
-    if (noJs) {
+    // 禁用JavaScript（如果指定了disableJavaScript）
+    if (disableJavaScript) {
       await page.setJavaScriptEnabled(false);
       console.log("JavaScript execution disabled for static content");
     }
@@ -58,7 +63,7 @@ async function convertHtmlToMarkdown(
     });
 
     // 更健壮的内容等待策略（仅在未禁用JavaScript时执行）
-    if (!noJs) {
+    if (!disableJavaScript) {
       console.log("Waiting for dynamic content...");
       await waitForContent(page);
     }
@@ -85,9 +90,8 @@ async function convertHtmlToMarkdown(
     // 清理多余的换行
     markdown = cleanMarkdown(markdown);
 
-    // 保存到文件
-    fs.writeFileSync(outputPath, `# ${article.title}\n\n${markdown}`);
-    console.log(`✅ Markdown saved to ${outputPath}`);
+    // 返回Markdown内容
+    return `# ${article.title}\n\n${markdown}`;
   } catch (error) {
     console.error("❌ Error:", error.message);
     throw error; // 重新抛出错误，让调用者处理
@@ -299,4 +303,6 @@ function cleanMarkdown(markdown) {
 }
 
 // 导出主函数
-module.exports = convertHtmlToMarkdown;
+module.exports = {
+  convert: convertHtmlToMarkdown,
+};

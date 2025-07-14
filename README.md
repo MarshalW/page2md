@@ -123,7 +123,7 @@ page2md is licensed under the MIT License. See the [LICENSE](LICENSE) file for d
 
 ## Support
 
-For issues, feature requests, or questions, please open an issue on the [GitHub repository](https://github.com/page2md/page2md) or contact the maintainers at support@page2md.com.
+For issues, feature requests, or questions, please open an issue on the [GitHub repository](https://github.com/marshalw/page2md).
 
 ---
 

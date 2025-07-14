@@ -1,6 +1,6 @@
 {
     "name": "page2md",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "A Node.js utility to convert HTML content to Markdown.",
     "main": "index.js",
     "bin": {
