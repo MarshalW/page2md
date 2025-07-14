@@ -1,33 +1,35 @@
 #!/usr/bin/env node
 
 // cli.js
+const { program } = require("commander");
 const convertHtmlToMarkdown = require("./index");
 const path = require("path");
+const packageJson = require("./package.json");
 
-// 命令行参数解析
-const args = process.argv.slice(2);
-let url, outputPath;
+// Configure commander
+program
+  .version(packageJson.version, "-v, --version", "Output the current version")
+  .argument("<url>", "URL of the webpage to convert")
+  .requiredOption("-o, --output <output-file>", "Output Markdown file path")
+  .option(
+    "-t, --timeout <ms>",
+    "Set the maximum time to wait for page loading (in milliseconds)",
+    "30000"
+  )
+  .option("--no-js", "Disable JavaScript execution for static content only")
+  .action(async (url, options) => {
+    const outputPath = path.resolve(options.output);
+    const timeout = parseInt(options.timeout, 10);
+    const noJs = options.noJs || false;
 
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === "-o" && args[i + 1]) {
-    outputPath = path.resolve(args[i + 1]);
-    i++;
-  } else if (!url) {
-    url = args[i];
-  }
-}
+    try {
+      await convertHtmlToMarkdown(url, outputPath, timeout, noJs);
+      console.log(`✅ Conversion completed successfully`);
+      process.exit(0);
+    } catch (error) {
+      console.error("❌ Conversion failed:", error.message);
+      process.exit(1);
+    }
+  });
 
-if (!url || !outputPath) {
-  console.error("Usage: html2md <url> -o <output-file>");
-  process.exit(1);
-}
-
-(async () => {
-  try {
-    await convertHtmlToMarkdown(url, outputPath);
-    process.exit(0);
-  } catch (error) {
-    console.error("Conversion failed.");
-    process.exit(1);
-  }
-})();
+program.parse(process.argv);

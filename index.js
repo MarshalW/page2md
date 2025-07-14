@@ -11,8 +11,15 @@ const wait = promisify(setTimeout);
  * 将给定URL的HTML内容转换为Markdown。
  * @param {string} url - 要转换的网页URL。
  * @param {string} outputPath - Markdown文件的输出路径。
+ * @param {number} timeout - Maximum time to wait for page loading in milliseconds.
+ * @param {boolean} noJs - Disable JavaScript execution for static content.
  */
-async function convertHtmlToMarkdown(url, outputPath) {
+async function convertHtmlToMarkdown(
+  url,
+  outputPath,
+  timeout = 30000,
+  noJs = false
+) {
   let browser;
   try {
     // 启动浏览器
@@ -37,16 +44,24 @@ async function convertHtmlToMarkdown(url, outputPath) {
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     );
 
+    // 禁用JavaScript（如果指定了--no-js）
+    if (noJs) {
+      await page.setJavaScriptEnabled(false);
+      console.log("JavaScript execution disabled for static content");
+    }
+
     // 导航到目标URL
     console.log(`Loading: ${url}`);
     await page.goto(url, {
-      waitUntil: "domcontentloaded", // 或 'load'
-      timeout: 60000,
+      waitUntil: "domcontentloaded",
+      timeout,
     });
 
-    // 更健壮的内容等待策略
-    console.log("Waiting for dynamic content...");
-    await waitForContent(page);
+    // 更健壮的内容等待策略（仅在未禁用JavaScript时执行）
+    if (!noJs) {
+      console.log("Waiting for dynamic content...");
+      await waitForContent(page);
+    }
 
     // 获取页面HTML内容
     const htmlContent = await page.content();
