@@ -1,0 +1,30 @@
+{
+    "name": "page2md",
+    "version": "1.0.0",
+    "description": "A Node.js utility to convert HTML content to Markdown.",
+    "main": "index.js",
+    "bin": {
+        "page2md": "cli.js"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "html",
+        "markdown",
+        "converter",
+        "puppeteer"
+    ],
+    "author": "Marshal Wu <marshal.wu@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "@mozilla/readability": "^0.6.0",
+        "commander": "^14.0.0",
+        "jsdom": "^26.1.0",
+        "puppeteer": "^24.12.1",
+        "turndown": "^7.2.0"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    }
+}
