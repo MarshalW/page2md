@@ -17,7 +17,6 @@ To get started with page2md, follow these steps:
 1. **Prerequisites**:
    - Node.js (version 14 or higher)
    - npm (Node Package Manager)
-   - A modern headless browser (e.g., Puppeteer or Playwright, depending on the installation)
 
 2. **Install via npm**:
    ```bash
